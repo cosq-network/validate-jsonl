@@ -1,13 +1,32 @@
+import argparse
 import json
-import sys
 
-def process_jsonl_file(file_path):
+def validate_message_structure(messages):
+    expected_roles = {"system", "user", "assistant"}
+    if len(messages) != 3:
+        return False
+    for msg in messages:
+        if not isinstance(msg, dict) or 'role' not in msg or 'content' not in msg:
+            return False
+        if msg['role'] not in expected_roles:
+            return False
+    return True
+
+def process_jsonl_file(file_path, openai_mode):
     try:
         with open(file_path, 'r') as file:
             for line_number, line in enumerate(file, start=1):
                 try:
                     json_object = json.loads(line)
-                    print(f"Line {line_number}: JSON object successfully parsed.")
+                    if openai_mode:
+                        if 'messages' in json_object and isinstance(json_object['messages'], list):
+                            if validate_message_structure(json_object['messages']):
+                                print(f"Line {line_number}: JSON object is valid.")
+                            else:
+                                print(f"Line {line_number}: Error - Invalid structure in 'messages' array.")
+                        else:
+                            print(f"Line {line_number}: Error - JSON object does not contain a valid 'messages' attribute.")
+
                 except json.JSONDecodeError as e:
                     print(f"Line {line_number}: JSON decoding error - {e}")
     except FileNotFoundError:
@@ -16,8 +35,10 @@ def process_jsonl_file(file_path):
         print(f"Error: An unexpected error occurred - {e}")
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: python script.py <file_path>")
-    else:
-        file_path = sys.argv[1]
-        process_jsonl_file(file_path)
+    parser = argparse.ArgumentParser(description="JSONL Validator")
+    parser.add_argument("file_path", help="Path to the JSONL file")
+    parser.add_argument("--openai", action="store_true", help="Enable OpenAI mode")
+
+    args = parser.parse_args()
+
+    process_jsonl_file(args.file_path, args.openai)
