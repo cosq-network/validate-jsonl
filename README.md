@@ -15,7 +15,7 @@ This Python script is designed to validate JSONL (JSON Lines) files. JSONL files
 ## Usage
 
 ```bash
-python script.py <file_path> [--openai]
+python validate-jsonl.py <file_path> [--openai]
 ```
 
 - `<file_path>`: Path to the JSONL file to be validated.
@@ -26,13 +26,13 @@ python script.py <file_path> [--openai]
 Validate a JSONL file:
 
 ```bash
-python script.py path/to/your/file.jsonl
+python validate-jsonl.py path/to/your/file.jsonl
 ```
 
 Enable OpenAI mode:
 
 ```bash
-python script.py path/to/your/file.jsonl --openai
+python validate-jsonl.py path/to/your/file.jsonl --openai
 ```
 
 ## Output
