@@ -13,6 +13,7 @@ def validate_message_structure(messages):
     return True
 
 def process_jsonl_file(file_path, openai_mode):
+    error_count = 0
     try:
         with open(file_path, 'r') as file:
             for line_number, line in enumerate(file, start=1):
@@ -20,15 +21,21 @@ def process_jsonl_file(file_path, openai_mode):
                     json_object = json.loads(line)
                     if openai_mode:
                         if 'messages' in json_object and isinstance(json_object['messages'], list):
-                            if validate_message_structure(json_object['messages']):
-                                print(f"Line {line_number}: JSON object is valid.")
-                            else:
+                            if not validate_message_structure(json_object['messages']):
                                 print(f"Line {line_number}: Error - Invalid structure in 'messages' array.")
+                                error_count += 1
                         else:
                             print(f"Line {line_number}: Error - JSON object does not contain a valid 'messages' attribute.")
-
+                            error_count += 1
                 except json.JSONDecodeError as e:
                     print(f"Line {line_number}: JSON decoding error - {e}")
+                    error_count += 1
+
+        if error_count == 0:
+            print("Success: No errors found.")
+        else:
+            print(f"Total errors found: {error_count}")
+
     except FileNotFoundError:
         print(f"Error: File not found - {file_path}")
     except Exception as e:
